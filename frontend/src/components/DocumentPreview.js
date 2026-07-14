@@ -1,35 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
 import mammoth from "mammoth";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
-// ✅ FIX: Use .js not .mjs — the .mjs build is not on cdnjs for newer versions
-pdfjs.GlobalWorkerOptions.workerSrc =
-  `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-
 const DocumentPreview = ({ fileUrl, fileType }) => {
-  const [numPages,    setNumPages]    = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const [docxHtml,    setDocxHtml]    = useState('');
   const [docxLoading, setDocxLoading] = useState(false);
-  const [pdfError,    setPdfError]    = useState(false);
-
-  useEffect(() => {
-    setCurrentPage(1);
-    setNumPages(null);
-    setPdfError(false);
-  }, [fileUrl]);
 
   useEffect(() => {
     if (fileType !== 'docx' || !fileUrl) return;
+
+    let cancelled = false;
     setDocxLoading(true);
+
     fetch(fileUrl)
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .then(buf => mammoth.convertToHtml({ arrayBuffer: buf }))
-      .then(res => setDocxHtml(res.value))
-      .catch(() => setDocxHtml('<p>Could not load document.</p>'))
-      .finally(() => setDocxLoading(false));
+      .then(res => { if (!cancelled) setDocxHtml(res.value); })
+      .catch(() => { if (!cancelled) setDocxHtml('<p>Could not load document.</p>'); })
+      .finally(() => { if (!cancelled) setDocxLoading(false); });
+
+    return () => { cancelled = true; };
   }, [fileUrl, fileType]);
 
   if (!fileUrl) return <p>No file URL provided.</p>;

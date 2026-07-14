@@ -10,12 +10,14 @@ const Browse = () => {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const [search, setSearch] = useState('');
+
+  const [searchInput, setSearchInput] = useState('');
+  const [committedSearch, setCommittedSearch] = useState('');
   const [semester, setSemester] = useState('all');
   const [subject, setSubject] = useState('all');
   const [sort, setSort] = useState('newest');
 
-  const fetchDocuments = useCallback(async (pg = page) => {
+  const fetchDocuments = useCallback(async (pg) => {
     setLoading(true);
     try {
       const params = {
@@ -26,8 +28,8 @@ const Browse = () => {
         limit: DOCS_PER_PAGE
       };
 
-      if (search.trim()) {
-        params.search = search.trim();
+      if (committedSearch.trim()) {
+        params.search = committedSearch.trim();
       }
 
       const res = await api.get('/documents', { params });
@@ -39,20 +41,20 @@ const Browse = () => {
     } finally {
       setLoading(false);
     }
-  }, [search, semester, subject, sort, page]);
+  }, [committedSearch, semester, subject, sort]);
 
+  // Reset to page 1 whenever filters change.
   useEffect(() => {
-    fetchDocuments(1);
     setPage(1);
   }, [semester, subject, sort]);
 
   useEffect(() => {
     fetchDocuments(page);
-  }, [page]);
+  }, [page, fetchDocuments]);
 
   const handleSearch = () => {
+    setCommittedSearch(searchInput);
     setPage(1);
-    fetchDocuments(1);
   };
 
   const totalPages = Math.ceil(total / DOCS_PER_PAGE);
@@ -69,8 +71,8 @@ const Browse = () => {
               <input
                 type="text"
                 placeholder="Search documents..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSearch()}
               />
               <button onClick={handleSearch}>Search</button>
