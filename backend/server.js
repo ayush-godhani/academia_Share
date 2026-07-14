@@ -7,8 +7,8 @@ const authRoutes = require("./routes/auth.routes");
 const documentRoutes = require("./routes/documents.routes");
 const noticeRoutes = require("./routes/notices.routes");
 const profileRoutes = require("./routes/profile.routes");
-const notificationRoutes = require("./routes/notifications.routes"); // ✅ add
-const summaryRoutes = require("./routes/summary.routes");             // ✅ add
+const notificationRoutes = require("./routes/notifications.routes"); 
+const summaryRoutes = require("./routes/summary.routes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -37,10 +37,10 @@ app.get("/", (req, res) => {
 // ===== Routes =====
 app.use("/api/auth", authRoutes);
 app.use("/api/documents", documentRoutes);
-app.use("/api/documents", summaryRoutes);   // ✅ add — same prefix, adds POST /:id/summary
+app.use("/api/documents", summaryRoutes);   
 app.use("/api/notices", noticeRoutes);
 app.use("/api/profile", profileRoutes);
-app.use("/api/notifications", notificationRoutes); // ✅ add
+app.use("/api/notifications", notificationRoutes); 
 
 // ===== Health Check =====
 app.get("/api/health", (req, res) =>
